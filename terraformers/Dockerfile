@@ -1,7 +1,8 @@
 FROM quay.io/dtan4/terraforming:latest
 MAINTAINER nmrmsys nmrmsys@gmail.com
 
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
+RUN set -x; \
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
     apk update; \
     apk add terraform; \
     mkdir /root/.aws; \

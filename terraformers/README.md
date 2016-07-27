@@ -1,19 +1,13 @@
 
-# terraformers
+# Terraformers
 
-terraform and terraforming Docker Image
+Terraform and Terraforming Docker Image
 
 # Install
 
 ```
-./install.sh
-```
-
-# Setup
-
-```
-./setup.sh
-# vi ~/.aws/credentials
+# Setting ~/.aws/credentials on the host  
+./install.sh [<default-region>]
 ```
 
 # Usage
@@ -24,6 +18,12 @@ vi *.tf
 ../terraform [--version] [--help] <command> [<args>]
 ../terraforming <command> [<args>]
 cd ..
+```
+
+# Shell
+
+```
+./shell.sh
 ```
 
 # Uninstall
@@ -37,6 +37,9 @@ cd ..
 ```
 ./build.sh
 ```
+
+# Image Repository
+Docker Hub: [nmrmsys/terraformers](https://hub.docker.com/r/nmrmsys/terraformers/)
 
 # Licence
 [MIT](http://opensource.org/licenses/mit-license.php)
