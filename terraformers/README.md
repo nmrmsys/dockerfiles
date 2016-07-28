@@ -17,6 +17,7 @@ cd tf
 vi *.tf
 ../terraform [--version] [--help] <command> [<args>]
 ../terraforming <command> [<args>]
+../terraforming-all <profile> [--no-merge] [<args>]
 cd ..
 ```
 

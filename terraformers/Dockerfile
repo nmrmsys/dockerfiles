@@ -6,7 +6,7 @@ RUN set -x; \
     apk update; \
     apk add terraform; \
     mkdir /root/.aws; \
-    touch /root/.aws/credentials; \
+    echo -e "[default]\naws_access_key_id = xxx\naws_secret_access_key = xxx" > /root/.aws/credentials; \
     mkdir /root/tf; \
     find /usr/bin -type f -name terraform-provider-\* | grep -v aws | xargs rm; \
     rm -rf /var/cache/apk/*

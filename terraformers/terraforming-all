@@ -1,0 +1,52 @@
+#!/bin/sh
+
+if [ $# -eq 0 ] || [ "$1" = "--no-merge" ]; then
+cat <<EOF
+Usage: terraforming-all <profile> [<args>]
+Options:
+  [--no-merge]       # tfstate file to merge
+  [--region=REGION]  # AWS region
+EOF
+exit 1
+fi
+
+TRD=`dirname $0`
+
+PRF=$1
+shift 1
+
+for OPT in "$@"
+do
+    case "$OPT" in
+        '--no-merge' )
+            NO_MERGE="ON"
+            shift 1
+            ;;
+    esac
+done
+
+if [ ! -d ./$PRF ]; then
+    mkdir ./$PRF
+fi 
+
+if [ "$NO_MERGE" = "" ] && [ ! -f ./$PRF/terraform.tfstate ]; then
+    echo '{"version": 1,"serial": 0,"modules": [{"path": ["root"],"outputs": {},"resources": {}}]}' > ./$PRF/terraform.tfstate
+fi 
+
+for cmd in `$TRD/terraforming help | grep terraforming | grep -v help | awk '{print $2}'`
+do
+    echo "$TRD/terraforming $cmd $* > ./$PRF/$cmd.tf" 
+    $TRD/terraforming $cmd $* > ./$PRF/$cmd.tf 
+    if [ "$NO_MERGE" = "" ]; then
+        echo "$TRD/terraforming $cmd --tfstate --merge=./$PRF/terraform.tfstate --overwrite $*"
+        $TRD/terraforming $cmd --tfstate --merge=./$PRF/terraform.tfstate --overwrite $*
+    else
+        echo "$TRD/terraforming $cmd --tfstate $* > ./$PRF/$cmd.tfstate"
+        $TRD/terraforming $cmd --tfstate $* > ./$PRF/$cmd.tfstate 
+    fi
+done
+
+echo "find ./$PRF -type f -name \*.tf | xargs wc -l | grep '^ *1 ' | awk '{print $2;}' | xargs -r rm"
+find ./$PRF -type f -name \*.tf | xargs wc -l | grep '^ *1 ' | awk '{print $2;}' | xargs -r rm
+echo "find ./$PRF -type f -name \*.tfstate | grep -v 'terraform.tfstate' | xargs wc -l | grep '^ *15 ' | awk '{print $2;}' | xargs -r rm"
+find ./$PRF -type f -name \*.tfstate | grep -v 'terraform.tfstate' | xargs wc -l | grep '^ *15 ' | awk '{print $2;}' | xargs -r rm
