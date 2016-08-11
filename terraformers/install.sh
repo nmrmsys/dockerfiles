@@ -10,6 +10,24 @@ fi
 TRD=`dirname $0`
 HMD=~
 
+# create default terraformers config
+if [ ! -f $HMD/.terraformers ]; then
+cat <<EOF > $HMD/.terraformers
+# general settings
+tfstate_control=true
+history_backup=true
+backend_setting=true
+
+# backend settings
+backend=S3
+access_key=xxx
+secret_key=xxx
+region=$DRG
+bucket=terraformers
+EOF
+    chmod 600 $HMD/.terraformers
+fi
+
 # path setting for Cygwin
 if [ -x "`which cygpath`" ]; then
     TRD=`cygpath -ma $TRD`

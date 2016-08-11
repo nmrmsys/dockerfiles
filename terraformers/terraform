@@ -1,4 +1,113 @@
 #!/bin/sh
 
-docker exec terraformers terraform $*
+TFS=_tfstate
+NAM=default
+TRD=`dirname $0`
+HMD=~
 
+# load terraformers config
+if [ -f $HMD/.terraformers ]; then
+    . $HMD/.terraformers
+else
+    echo "~/.terraformers config file not found."
+    exit 1
+fi
+
+# parse arguments
+for ARG in "$@"
+do
+    case "$ARG" in
+        '--help'|'-help')
+            HELP="$1"
+            shift 1
+            ;;
+        '-var')
+            OPTS="$OPTS -var '$2'"
+            shift 2
+            ;;
+        -*)
+            OPTS="$OPTS $1"
+            shift 1
+            ;;
+        *)
+            if [ "$CMDS" = "" ] || [ "$CMDS" = " remote" ]; then
+                CMDS="$CMDS $1"
+            else
+                if [ "$DIR" = "" ]; then
+                    DIR="/$1"
+                    NAM="$1"
+                fi
+                ARGS="$ARGS $1"
+            fi
+            shift 1
+            ;;
+    esac
+done
+
+# history backup preprocess
+if [ "$tfstate_control" = "true" ] && [ "$history_backup" = "true" ]; then
+    BAK=".$DIR/$TFS/terraform.tfstate.backup"
+    if [ -f $BAK ]; then
+        BTS=`stat -c %y $BAK | date -f - +%Y%m%d_%H%M%S`
+        HIS=".$DIR/$TFS/terraform.tfstate.$BTS"
+        if [ ! -f $HIS ]; then
+            cp $BAK $HIS
+        fi
+    fi
+fi
+
+# execute terraform
+if [ "$HELP" != "" ]; then
+    docker exec terraformers terraform $CMDS $OPTS $ARGS $HELP
+else
+    if [ "$tfstate_control" = "true" ]; then
+        STATE="-state=.$DIR/$TFS/terraform.tfstate"
+        if [ ! -d .$DIR/$TFS ]; then
+            mkdir .$DIR/$TFS
+        fi
+    fi
+    case "$CMDS" in
+        ' apply'|' destroy'|' output'|' plan'|' refresh'|' taint'|' untaint'|' remote config')
+            # execute terraform with -state option
+            echo terraform $CMDS $OPTS $STATE $ARGS
+            docker exec terraformers terraform $CMDS $OPTS $STATE $ARGS
+            ;;
+        ' remote pull'|' remote push')
+            if [ "$backend_setting" = "true" ]; then
+                # execute terraform remote config
+                echo terraform remote config $STATE -backend=$backend -backend-config="access_key=$access_key" -backend-config="secret_key=$secret_key" -backend-config="region=$region" -backend-config="bucket=$bucket" -backend-config="key=$NAM.tfstate" $ARGS
+                docker exec terraformers terraform remote config $STATE -backend=$backend -backend-config="access_key=$access_key" -backend-config="secret_key=$secret_key" -backend-config="region=$region" -backend-config="bucket=$bucket" -backend-config="key=$NAM.tfstate" $ARGS
+                # execute terraform without -state option
+                echo terraform $CMDS $OPTS $ARGS
+                docker exec terraformers terraform $CMDS $OPTS $ARGS
+                # execute terraform remote config -disable
+                echo terraform remote config -disable $STATE $ARGS
+                docker exec terraformers terraform remote config -disable $STATE $ARGS
+            else
+                # execute terraform without -state option
+                echo terraform $CMDS $OPTS $ARGS
+                docker exec terraformers terraform $CMDS $OPTS $ARGS
+            fi
+            ;;
+        *)
+            # execute terraform without -state option
+            echo terraform $CMDS $OPTS $ARGS
+            docker exec terraformers terraform $CMDS $OPTS $ARGS
+            ;;
+    esac
+fi
+
+# history backup postprocess
+if [ "$tfstate_control" = "true" ] && [ "$history_backup" = "true" ]; then
+    if [ -f $BAK ]; then
+        diff $BAK $HIS > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            rm $HIS
+        fi
+        BTS=`stat -c %y $BAK | date -f - +%Y%m%d_%H%M%S`
+        HIS=".$DIR/$TFS/terraform.tfstate.$BTS"
+        if [ ! -f $HIS ]; then
+            cp $BAK $HIS
+        fi
+    fi
+fi

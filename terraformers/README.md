@@ -8,6 +8,7 @@ Terraform and Terraforming Docker Image
 ```
 # Setting ~/.aws/credentials on the host  
 ./install.sh [<default-region>]
+# Setting ~/.terraformers on the host
 ```
 
 # Usage

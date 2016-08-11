@@ -10,15 +10,17 @@ EOF
 exit 1
 fi
 
+TFS=_tfstate
+TFP=_tfspart
 TRD=`dirname $0`
 
 PRF=$1
 shift 1
 
-for OPT in "$@"
+for ARG in "$@"
 do
-    case "$OPT" in
-        '--no-merge' )
+    case "$ARG" in
+        '--no-merge')
             NO_MERGE="ON"
             shift 1
             ;;
@@ -29,8 +31,17 @@ if [ ! -d ./$PRF ]; then
     mkdir ./$PRF
 fi 
 
-if [ "$NO_MERGE" = "" ] && [ ! -f ./$PRF/terraform.tfstate ]; then
-    echo '{"version": 1,"serial": 0,"modules": [{"path": ["root"],"outputs": {},"resources": {}}]}' > ./$PRF/terraform.tfstate
+if [ "$NO_MERGE" = "" ]; then
+    if [ ! -d ./$PRF/$TFS ]; then
+        mkdir ./$PRF/$TFS
+    fi
+    if [ ! -f ./$PRF/terraform.tfstate ]; then
+        echo '{"version": 1,"serial": 0,"modules": [{"path": ["root"],"outputs": {},"resources": {}}]}' > ./$PRF/$TFS/terraform.tfstate
+    fi
+else
+    if [ ! -d ./$PRF/$TFP ]; then
+        mkdir ./$PRF/$TFP
+    fi
 fi 
 
 for cmd in `$TRD/terraforming help | grep terraforming | grep -v help | awk '{print $2}'`
@@ -38,15 +49,17 @@ do
     echo "$TRD/terraforming $cmd $* > ./$PRF/$cmd.tf" 
     $TRD/terraforming $cmd $* > ./$PRF/$cmd.tf 
     if [ "$NO_MERGE" = "" ]; then
-        echo "$TRD/terraforming $cmd --tfstate --merge=./$PRF/terraform.tfstate --overwrite $*"
-        $TRD/terraforming $cmd --tfstate --merge=./$PRF/terraform.tfstate --overwrite $*
+        echo "$TRD/terraforming $cmd --tfstate --merge=./$PRF/$TFS/terraform.tfstate --overwrite $*"
+        $TRD/terraforming $cmd --tfstate --merge=./$PRF/$TFS/terraform.tfstate --overwrite $*
     else
-        echo "$TRD/terraforming $cmd --tfstate $* > ./$PRF/$cmd.tfstate"
-        $TRD/terraforming $cmd --tfstate $* > ./$PRF/$cmd.tfstate 
+        echo "$TRD/terraforming $cmd --tfstate $* > ./$PRF/$TFP/$cmd.tfstate"
+        $TRD/terraforming $cmd --tfstate $* > ./$PRF/$TFP/$cmd.tfstate
     fi
 done
 
 echo "find ./$PRF -type f -name \*.tf | xargs wc -l | grep '^ *1 ' | awk '{print $2;}' | xargs -r rm"
 find ./$PRF -type f -name \*.tf | xargs wc -l | grep '^ *1 ' | awk '{print $2;}' | xargs -r rm
-echo "find ./$PRF -type f -name \*.tfstate | grep -v 'terraform.tfstate' | xargs wc -l | grep '^ *15 ' | awk '{print $2;}' | xargs -r rm"
-find ./$PRF -type f -name \*.tfstate | grep -v 'terraform.tfstate' | xargs wc -l | grep '^ *15 ' | awk '{print $2;}' | xargs -r rm
+if [ "$NO_MERGE" != "" ]; then
+    echo "find ./$PRF/$TFP -type f -name \*.tfstate | grep -v 'terraform.tfstate' | xargs wc -l | grep '^ *15 ' | awk '{print $2;}' | xargs -r rm"
+    find ./$PRF/$TFP -type f -name \*.tfstate | xargs wc -l | grep '^ *15 ' | awk '{print $2;}' | xargs -r rm
+fi
