@@ -7,13 +7,13 @@ else
     DRG=$1
 fi
 
+TRD=`dirname $0`
+HMD=~
+
 # path setting for Cygwin
 if [ -x "`which cygpath`" ]; then
-    TRD=`cygpath -ma .`
-    HMD=`cygpath -ma ~`
-else
-    TRD=$PWD
-    HMD=~
+    TRD=`cygpath -ma $TRD`
+    HMD=`cygpath -ma $HMD`
 fi 
 
 # create container
