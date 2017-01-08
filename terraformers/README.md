@@ -6,7 +6,7 @@ Terraform and Terraforming Docker Image
 # Install
 
 ```
-# Setting ~/.aws/credentials on the host  
+# Setting ~/.aws/credentials,config on the host  
 ./install.sh [<default-region>]
 # Setting ~/.terraformers on the host
 ```
@@ -19,6 +19,8 @@ vi *.tf
 ../terraform [--version] [--help] <command> [<args>]
 ../terraforming <command> [<args>]
 ../terraforming-all <profile> [--no-merge] [<args>]
+../aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+../jq [options] <jq filter> [file...]
 cd ..
 ```
 
