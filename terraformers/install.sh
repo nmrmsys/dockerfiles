@@ -47,3 +47,8 @@ if [ -f $HMD/.aws/credentials ]; then
     docker cp $HMD/.aws/credentials terraformers:/root/.aws/credentials
 fi
 
+# copy config
+if [ -f $HMD/.aws/config ]; then
+    docker cp $HMD/.aws/config terraformers:/root/.aws/config
+fi
+
