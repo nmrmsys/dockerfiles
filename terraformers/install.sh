@@ -7,7 +7,7 @@ else
     DRG=$1
 fi
 
-TRD=`dirname $0`
+TRD=$(cd $(dirname $0) && pwd)
 HMD=~
 
 # create default terraformers config
@@ -29,7 +29,7 @@ EOF
 fi
 
 # path setting for Cygwin
-if [ -x "`which cygpath`" ]; then
+if type cygpath > /dev/null 2>&1; then
     TRD=`cygpath -ma $TRD`
     HMD=`cygpath -ma $HMD`
 fi 
