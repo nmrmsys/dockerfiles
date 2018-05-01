@@ -15,6 +15,7 @@ RUN set -x && \
     yum -y install epel-release && \
     rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm && \
     yum -y install --enablerepo=remi,remi-php71 php php-devel php-mbstring php-pdo php-gd php-mysqlnd php-xml php-pear php-phpunit-PHPUnit && \
+    yum -y install wget zip unzip && \
     curl -sS https://getcomposer.org/installer | php && \
     mv /root/composer.phar /usr/local/bin/composer
 
