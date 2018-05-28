@@ -1,0 +1,24 @@
+FROM centos:centos7.4.1708
+LABEL maintainer "nmrmsys <nmrmsys@gmail.com>"
+
+WORKDIR /root
+RUN set -x && \
+    yum -y install openssh-server initscripts && \
+    sshd-keygen && \
+    echo 'root:password' | chpasswd && \
+    yum -y install httpd && \
+    yum -y install mod_ssl && \
+    systemctl enable httpd.service && \
+    yum -y install https://yum.postgresql.org/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm && \
+    yum -y install postgresql96-server postgresql96-contrib && \
+    systemctl enable postgresql-9.6.service && \
+    yum -y install epel-release && \
+    rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm && \
+    yum -y install --enablerepo=remi,remi-php71 php php-devel php-mbstring php-pdo php-gd php-xml php-pear php-phpunit-PHPUnit php-pgsql && \
+    yum -y install wget zip unzip && \
+    curl -sS https://getcomposer.org/installer | php && \
+    mv /root/composer.phar /usr/local/bin/composer
+
+EXPOSE 22 80 443 5432
+
+CMD ["/sbin/init"]

@@ -1,0 +1,27 @@
+FROM centos:centos7.4.1708
+LABEL maintainer "nmrmsys <nmrmsys@gmail.com>"
+
+WORKDIR /root
+RUN set -x && \
+    yum -y install openssh-server initscripts && \
+    sshd-keygen && \
+    echo 'root:password' | chpasswd && \
+    yum -y install httpd && \
+    yum -y install mod_ssl && \
+    systemctl enable httpd.service && \
+    curl -o /etc/yum.repos.d/mssql-server.repo https://packages.microsoft.com/config/rhel/7/mssql-server-2017.repo && \
+    yum install -y mssql-server && \
+    curl https://packages.microsoft.com/config/rhel/7/prod.repo > /etc/yum.repos.d/mssql-release.repo && \
+    ACCEPT_EULA=Y yum install msodbcsql && \
+    yum -y install epel-release && \
+    rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm && \
+    yum -y install --enablerepo=remi,remi-php71 php php-devel php-mbstring php-pdo php-gd php-xml php-pear php-phpunit-PHPUnit php-sqlsrv && \
+    yum -y install wget zip unzip && \
+    curl -sS https://getcomposer.org/installer | php && \
+    mv /root/composer.phar /usr/local/bin/composer
+
+#/opt/mssql/bin/mssql-conf setup
+
+EXPOSE 22 80 443 1433
+
+CMD ["/sbin/init"]
