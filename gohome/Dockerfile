@@ -16,6 +16,6 @@ RUN set -x && \
 ENV GOPATH /root/gopath
 ENV PATH $PATH:/usr/go/bin:$GOPATH/bin
 
-EXPOSE 22 80 443 3306
+EXPOSE 22
 
 CMD ["/sbin/init"]
