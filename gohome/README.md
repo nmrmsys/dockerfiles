@@ -15,6 +15,12 @@ Golang Development Docker Image
 ./shell.sh
 ```
 
+# Sftp
+
+```
+sftp -P 10022 root@localhost
+```
+
 # Uninstall
 
 ```
