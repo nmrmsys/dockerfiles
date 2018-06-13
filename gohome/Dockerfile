@@ -8,7 +8,7 @@ RUN set -x && \
     yum -y install openssh-server initscripts && \
     sshd-keygen && \
     echo 'root:password' | chpasswd && \
-    yum -y install wget zip unzip git && \
+    yum -y install wget zip unzip git make && \
     curl -O https://dl.google.com/go/go${go_ver}.linux-amd64.tar.gz && \
     tar -C /usr -xzf go${go_ver}.linux-amd64.tar.gz && \
     mkdir -p /root/gopath
