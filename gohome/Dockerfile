@@ -11,7 +11,8 @@ RUN set -x && \
     yum -y install wget zip unzip git make && \
     curl -O https://dl.google.com/go/go${go_ver}.linux-amd64.tar.gz && \
     tar -C /usr -xzf go${go_ver}.linux-amd64.tar.gz && \
-    mkdir -p /root/gopath
+    mkdir -p /root/gopath/src/github.com/nmrmsys && \
+    ln -s gopath/src/github.com/nmrmsys gohome
 
 ENV GOPATH /root/gopath
 ENV PATH $PATH:/usr/go/bin:$GOPATH/bin
