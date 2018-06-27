@@ -1,5 +1,5 @@
 
-# gohome
+# centos-server
 
 CentOS Server Docker Image
 

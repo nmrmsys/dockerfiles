@@ -1,5 +1,5 @@
 
-# gohome
+# ubuntu-server
 
 Ubuntu Server Docker Image
 
